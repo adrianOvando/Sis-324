@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Productos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Productos en {{ category_name }}</h1>
+        
+        <!-- Buscador -->
+        <input type="text" id="search" class="form-control mb-4" placeholder="Buscar productos...">
+        
+        <div class="row" id="product-list">
+            {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <a href="/product/{{ product.id }}" class="btn btn-primary">Ver Detalle</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Función para filtrar productos
+        document.getElementById('search').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            const products = document.querySelectorAll('#product-list .col-md-4');
+            products.forEach(product => {
+                const title = product.querySelector('.card-title').textContent.toLowerCase();
+                product.style.display = title.includes(query) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
