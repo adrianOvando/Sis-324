@@ -48,7 +48,7 @@ def create_product():
             conn = get_db_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
+            cursor.execute(''' 
                 INSERT INTO products (name, description, price, stock, category_id, image_url)
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', (
@@ -61,9 +61,10 @@ def create_product():
             ))
             
             conn.commit()
+
+            # Redirigir a la lista de productos de la categoría
             return redirect(url_for('product_routes.list_products', category_id=data['category_id']))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         finally:
             conn.close()
-

@@ -33,10 +33,17 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ category.name }}</h5>
                             <p class="card-text">{{ category.description or 'Sin descripción' }}</p>
-                            <div class="d-flex justify-content-end">
+                            <div class="d-flex justify-content-between">
                                 <a href="/products/{{ category.id }}" class="btn btn-outline-primary">
                                     Ver Productos
                                 </a>
+
+                                <!-- Formulario para eliminar categoría -->
+                                <form action="/categories/delete/{{ category.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta categoría?');">
+                                    <button type="submit" class="btn btn-danger">
+                                        Eliminar
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

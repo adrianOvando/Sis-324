@@ -7,29 +7,67 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">Tienda</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-primary position-relative">
+                            🛒 Ver Carrito
+                            {% if session.get('user_id') %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ session.get('cart_count', 0) }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% if session.get('user_id') %}
+                        <li class="nav-item ms-2">
+                            <form action="{{ url_for('user_routes.logout') }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-outline-danger">Cerrar Sesión</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-2">
+                            <a href="{{ url_for('user_routes.login') }}" class="btn btn-outline-success">Iniciar Sesión</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/products">Productos</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
-            </ol>
-        </nav>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <div class="row">
             <div class="col-md-6">
-                {% if product.image_url %}
-                <img src="{{ product.image_url }}" class="img-fluid" alt="{{ product.name }}">
+                {% if product['image_url'] %}
+                <img src="{{ product['image_url'] }}" class="img-fluid" alt="{{ product['name'] }}">
                 {% endif %}
             </div>
             <div class="col-md-6">
-                <h1>{{ product.name }}</h1>
-                <p class="lead">{{ product.description }}</p>
-                <p><strong>Precio:</strong> ${{ product.price }}</p>
-                <p><strong>Stock:</strong> {{ product.stock }}</p>
-                {% if product.stock > 0 %}
-                <button class="btn btn-primary">Agregar al Carrito</button>
+                <h1>{{ product['name'] }}</h1>
+                <p class="lead">{{ product['description'] }}</p>
+                <p><strong>Precio:</strong> ${{ product['price'] }}</p>
+                <p><strong>Stock:</strong> {{ product['stock'] }}</p>
+                {% if product['stock'] > 0 %}
+                    {% if session.get('user_id') %}
+                        <form action="{{ url_for('cart.add_to_cart', product_id=product['id']) }}" method="POST">
+                            <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('user_routes.login') }}" class="btn btn-primary">Iniciar sesión para comprar</a>
+                    {% endif %}
                 {% else %}
-                <button class="btn btn-secondary" disabled>Sin Stock</button>
+                    <button class="btn btn-secondary" disabled>Sin Stock</button>
                 {% endif %}
             </div>
         </div>

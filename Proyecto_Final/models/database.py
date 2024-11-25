@@ -13,7 +13,7 @@ def init_db():
     """Inicializa la base de datos con todas las tablas necesarias"""
     conn = get_db_connection()
     try:
-        # Crear tabla de usuarios
+        # Crear tabla de usuarios si no existe
         conn.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,19 +24,45 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
         cursor = conn.cursor()
+        # Verificar si la columna role existe
         columns = cursor.execute("PRAGMA table_info(users)").fetchall()
         role_exists = any(column[1] == 'role' for column in columns)
         
         if not role_exists:
             cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
+        
+        # Lista de usuarios admin por defecto con el email correcto para adrian
+        default_admins = [
+            ('bryan', 'bryan@example.com'),
+            ('adrian', 'adria@gmail.com')  # Email corregido
+        ]
+        
+        # Asegurarse de que los usuarios admin existan y tengan el rol correcto
+        for admin_user, admin_email in default_admins:
+            # Verificar si el usuario ya existe
+            existing_user = cursor.execute(
+                "SELECT * FROM users WHERE username = ?", 
+                (admin_user,)
+            ).fetchone()
             
-        cursor.execute("UPDATE users SET role = 'admin' WHERE username = 'bryan'")
-        cursor.execute("UPDATE users SET role = 'user' WHERE username = 'test_user'")
+            if not existing_user:
+                # Si no existe, crear el usuario con una contraseña hasheada
+                import hashlib
+                default_password = hashlib.sha256('admin123'.encode()).hexdigest()
+                cursor.execute('''
+                    INSERT INTO users (username, password, email, role)
+                    VALUES (?, ?, ?, 'admin')
+                ''', (admin_user, default_password, admin_email))
+            else:
+                # Si existe, asegurarse de que tenga rol de admin
+                cursor.execute('''
+                    UPDATE users SET role = 'admin'
+                    WHERE username = ?
+                ''', (admin_user,))
         
-        
-        
-        # Crear tabla de categorías
+        # Resto de la inicialización de la base de datos...
         conn.execute('''
             CREATE TABLE IF NOT EXISTS categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +72,6 @@ def init_db():
             )
         ''')
 
-        # Crear tabla de productos
         conn.execute('''
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,10 +96,23 @@ def init_db():
             )
         ''')
         
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS cart_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (product_id) REFERENCES products(id),
+                UNIQUE (user_id, product_id)  -- Asegura que un producto no se repita en el carrito del mismo usuario
+            )
+        ''')
+        
         conn.commit()
         print("Base de datos inicializada correctamente")
+        
     except Exception as e:
         print(f"Error inicializando la base de datos: {e}")
     finally:
         conn.close()
-

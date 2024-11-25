@@ -21,6 +21,13 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
                         <a href="/product/{{ product.id }}" class="btn btn-primary">Ver Detalle</a>
+                        
+                        <!-- Botón de eliminación visible solo para administradores -->
+                        {% if is_admin %}
+                        <form action="/product/delete/{{ product.id }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger mt-2">Eliminar Producto</button>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -96,3 +96,21 @@ def list_categories_user():
         return jsonify({"error": f"Error obteniendo categorías: {str(e)}"}), 500
     finally:
         conn.close()
+
+# Nueva ruta para eliminar una categoría
+@category_bp.route('/categories/delete/<int:category_id>', methods=['POST'])
+def delete_category(category_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Eliminar la categoría por su ID
+        cursor.execute('DELETE FROM categories WHERE id = ?', (category_id,))
+        
+        conn.commit()
+
+        return redirect(url_for('category_routes.list_categories'))
+    except Exception as e:
+        return jsonify({"error": f"Error eliminando categoría: {str(e)}"}), 500
+    finally:
+        conn.close()
