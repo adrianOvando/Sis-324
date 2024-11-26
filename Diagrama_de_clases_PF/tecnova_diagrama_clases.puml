@@ -1,0 +1,77 @@
+@startuml
+class Users {
+    +id: int
+    +username: String
+    +password: String
+    +email: String
+    +role: String
+    +registrarse()
+    +iniciarSesion()
+    +verProductos()
+    +verCategorias()
+    +comprarProducto()
+}
+
+class Admin {
+    +crearProducto()
+    +eliminarProducto()
+    +crearCategoria()
+    +eliminarCategoria()
+    +eliminarUsuario()
+}
+
+class Products {
+    +id: int
+    +name: String
+    +description: String
+    +price: float
+    +stock: int
+    +category_id: int
+    +image_url: String
+    +created_at: Date
+}
+
+class Categories {
+    +id: int
+    +name: String
+    +description: String
+}
+
+class Carrito {
+    +user_id: int
+    +product_id: int
+    +agregarProducto()
+    +eliminarProducto()
+}
+
+class Factura {
+    +user_id: int
+    +fecha: Date
+    +total: float
+    +proceedToPayment()
+}
+
+class Compra {
+    +user_id: int
+    +productoId: int
+    +cantidad: int
+}
+
+Users --> "1" Carrito : tiene
+Users --> "1" Factura : genera
+Users --> "n" Products : compra
+Users --> "n" Categories : ve
+Admin --> "n" Products : crea/elimina
+Admin --> "n" Categories : crea/elimina
+Carrito --|> Users : hereda
+Carrito --|> Products : hereda
+Categories --> "n" Products : contiene
+Carrito --> "n" Products : contiene
+Compra --|> Users : hereda
+Compra --|> Products : hereda
+Compra --> Products : relaciona
+Compra --> Users : relaciona
+Factura --|> Users : hereda
+Factura --|> Products : hereda
+Factura --> Compra : incluye
+@enduml
